@@ -37,7 +37,7 @@ def load_data(IMAGES_PATH, minimum=36806):
         while i < minimum:
             path = os.path.join(IMAGES_PATH, dir, images[i])
             try:
-                image = cv2.imread(path, cv2.IMREAD_GRAYSCALE).flatten()
+                image = (cv2.imread(path, cv2.IMREAD_GRAYSCALE).flatten())/255
             except:
                 print('Bad image')
                 i += 1
@@ -48,7 +48,10 @@ def load_data(IMAGES_PATH, minimum=36806):
             i +=1
     print('Dataset length: ', len(X))
     print('Time: ', time.time() - start)
-    return X, y
+    random_order = np.random.permutation(len(X))
+    X = np.array(X)
+    y = np.array(y)
+    return X[random_order], y[random_order]
 
 from keras.models import Sequential
 
@@ -78,11 +81,10 @@ model.compile(loss='categorical_crossentropy',
               optimizer='sgd',
               metrics=['accuracy'])
 
-model.fit(X, np_utils.to_categorical(y), batch_size=32, epochs=50)
+history = model.fit(X, np_utils.to_categorical(y), batch_size=32, epochs=12, validation_split=0.2)
 y_pred = np.argmax(model.predict(np.array(X_test)), axis=1)
 
 print(accuracy_score(y_pred, y_test))
-
 
 #3
 model = Sequential()
@@ -124,3 +126,5 @@ model.compile(loss='categorical_crossentropy',
               metrics=['accuracy'])
 
 history = model.fit(X, np_utils.to_categorical(y), batch_size=32, epochs=epochs)
+y_pred = np.argmax(model.predict(np.array(X_test)), axis=1)
+print(accuracy_score(y_pred, y_test))
